@@ -264,13 +264,68 @@ function ApexLegends_Ping(){
 	echo ""
 }
 
+function Hypixel_Ping(){
+	echo -n -e "\t\t\t\t\t${Font_Red}【Minecraft: Hypixel】${Font_Suffix}\n"
+	echo ""
+	local Area=$1
+	show_TableHead
+	if [ -n "$Area" ];then
+		cat ${ip_file} | sed "/\<MCH\>/I! d" | sed "/\<$Area\>/I! d" > /tmp/IP_To_Ping.csv
+	else
+		cat ${ip_file} | sed "/\<MCH\>/I! d" > /tmp/IP_To_Ping.csv
+	fi
+	
+	local ip_file='/tmp/IP_To_Ping.csv'
+	while read -r line || [[ -n $line ]];do
+		content=$(echo $line)
+		local game=$(echo $content | awk '{print $1}' | cut -f1 -d",")
+		local ip=$(echo $content | awk '{print $2}' | cut -f1 -d",")
+		local country=$(echo $content | awk '{print $3}' | cut -f1 -d",")
+		local idc=$(echo $content | awk '{print $4}' | cut -f1 -d",")
+		local area=$(echo $content | awk '{print $5}' | cut -f1 -d",")
+		local ServerID=$(echo $content | awk '{print $6}' | cut -f1 -d",")
+		#screen -dmS LOL `ping $ip -w 4 -c 4 > /tmp/ping.txt`
+		ping $ip -w 4 -c 4 > /tmp/result.txt 2>&1 
+		cat /tmp/result.txt | grep '100%' >/dev/null 2>&1
+		
+		if [[ "$?" -eq "0" ]];then
+			ip_prefix=${ip}/24
+			newip=$(fping $ip_prefix -ag -r 1 | head -n 1)
+			local result=$(ping $newip -w 4 -c 4)
+		else
+			local result=$(cat /tmp/result.txt)
+		fi	
+			
+		local packetloss=$(echo $result | grep 'packet loss' | sed 's/packet loss.*//' | awk '{print $NF}')	
+		local latency=$(echo $result | grep 'avg' | sed 's/.*=//' | cut -f2 -d"/")	
+		
+		if [ $(echo "$latency < 50" | bc) -eq 1 ];then
+			LatencyClor="\033[32m"
+		else
+			LatencyClor="\033[31m"
+		fi	
+		
+		if [ $(echo "$(echo $packetloss |cut -f1 -d"%") < 5" | bc) -eq 1 ];then
+			PacketlossClor="\033[32m"
+		else
+			PacketlossClor="\033[31m"
+		fi
+		echo -n -e "${Font_SkyBlue}$game${Font_Suffix}\t\t  ${Font_Purple}$country${Font_Suffix}\t\t${LatencyClor}$latency ms${Font_Suffix}\t    ${PacketlossClor}$packetloss${Font_Suffix}\t\t    ${Font_Blue}   $idc${Font_Suffix}${Font_Red}         $ServerID${Font_Suffix}\n"
+	done < ${ip_file}	
+
+	echo -e "==================================================================================================="
+	echo ""
+}
+
 
 function GamePing(){
 LOL_Ping ${1}
 PUBG_Ping ${1}
 R6S_Ping ${1}
 ApexLegends_Ping ${1}
+Hypixel_Ping ${1}
 }
+
 
 function Goodbye(){
 echo -e "${Font_Green}本次测试已结束，感谢使用此脚本 ${Font_Suffix}"
