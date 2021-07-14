@@ -317,6 +317,16 @@ function Hypixel_Ping(){
 	echo ""
 }
 
+function Call_GameList(){
+clear
+GameList=$(curl https://raw.githubusercontent.com/lmc999/GamePing/main/GameList.txt -s)
+echo -n -e "${Font_Red}【Suport Game List】${Font_Suffix}\n"
+echo ""
+echo -n -e "${Font_SkyBlue}$GameList${Font_Suffix}\n"
+echo ""
+echo ""
+echo ""
+}
 
 function GamePing(){
 LOL_Ping ${1}
@@ -355,6 +365,7 @@ echo -e "${Font_SkyBlue}输入数字【2】：【美服延迟检测】检测${Fo
 echo -e "${Font_SkyBlue}输入数字【3】：【欧服延迟检测】检测${Font_Suffix}"
 echo -e "${Font_SkyBlue}输入数字【4】：【澳服延迟检测】检测${Font_Suffix}"
 echo -e "${Font_SkyBlue}输入数字【5】：【南美延迟检测】检测${Font_Suffix}"
+echo -e "${Font_SkyBlue}输入数字【0】：【查看支持游戏列表】${Font_Suffix}"
 read -p "请输入正确数字或直接按回车:" num
 }
 Start
@@ -390,6 +401,10 @@ function RunScript(){
 			ScriptTitle
 			GamePing LATINAMERICA
 			Goodbye
+			
+		elif [[ "$num" -eq 0 ]]; then
+			Call_GameList
+			
 		else
 			echo -e "${Font_Red}请重新执行脚本并输入正确号码${Font_Suffix}"
 			return
